@@ -1,0 +1,68 @@
+<html>
+<head>
+  <title>MP3: Texture Mapping  </title>
+  <meta http-equiv='content-type' content='text/html; charset=ISO-8859-1'>
+  <script type='text/javascript' src='js/gl-matrix-min.js'></script>
+  <script type='text/javascript' src='js/calNormal.js'></script>
+  <script type='text/javascript' src='js/initShader.js'></script>
+  <script type='text/javascript' src='js/objparser.js'></script>
+  <script type='text/javascript' src='js/buildCanvas.js'></script>
+  <script id="shader-vs" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+  attribute vec3 aVertexNormal;
+  uniform vec3 uLightPosition;
+  varying vec3 vNormal;
+  varying vec3 vLightRay;
+  varying vec3 vEyeVec;
+  uniform mat4 uMVMatrix; 
+  uniform mat4 uPMatrix; 
+  uniform mat4 uNMatrix; 
+  varying highp vec3 vVertexPosition;
+  void main(void) {
+       //Transformed vertex position
+       vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
+       //Transformed normal position
+       vNormal = vec3(uNMatrix * vec4(aVertexNormal, 1.0));
+       //Transformed light position
+       vec4 light = uMVMatrix * vec4(uLightPosition,1.0);
+       gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+  }
+  </script>
+
+  <script id="shader-fs" type="x-shader/x-fragment">
+    precision highp float;
+    uniform sampler2D uSampler; //Texture sampler
+    uniform samplerCube uCubeSampler;
+    uniform float uShininess;        //shininess
+    uniform vec4 uLightAmbient;      //light ambient
+    uniform vec4 uMaterialAmbient;  
+    varying vec3 vNormal;
+    varying vec3 vLightRay;
+    varying vec3 vEyeVec;
+    varying vec3 vVertexPosition;
+
+    void main(void)
+    {     //color
+         float theta = atan(vVertexPosition.z, vVertexPosition.x);
+         vec2 textureCoord = vec2(theta, vVertexPosition.y) + vec2(0.1, 0.1);
+         vec3 L = normalize(vLightRay);
+         vec3 N = normalize(vNormal);
+         gl_FragColor =  uLightAmbient * uMaterialAmbient * texture2D(uSampler, textureCoord) * textureCube(uCubeSampler, -vNormal);
+    }
+  </script>
+</head>
+
+<body onLoad='startup()'>
+  <h1>MP3: Texture Mapping  </h1>
+  <canvas id='mycanvas' width='1024' height='1024'>
+  </canvas>
+
+    <p>
+    AWDS for directions. <br>
+    I am using XMLHttpRequest instead of the sample code. I can open this page on chrome using localhost.
+    <br>
+    The texture pictures are using pictures online
+    </p>
+  </body>
+<script src="js/index.js"></script>
+</html>
